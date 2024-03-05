@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="d6g.win.resource.mapper.UserMetaMapper">
+
+    <select id="selectMetaByUserId" parameterType="int"
+            resultMap="BaseResultMap">
+        SELECT  * FROM usermeta where user_id = #{id}
+    </select>
+
+    <resultMap id="BaseResultMap" type="d6g.win.resource.entity.UserEntity">
+        <id property="id" column="id" jdbcType="INTEGER"/>
+        <result property="email" column="email" />
+        <result property="email" column="email" />
+        <result property="email" column="email" />
+        <result property="email" column="email" />
+        <result property="email" column="email" />
+        <collection
+                property="metas" javaType="ArrayList"
+                column="id"
+                ofType="d6g.win.resource.entity.UserMetaEntity"
+                select="d6g.win.resource.mapper.UserMetaMapper.selectMetaByUserId"
+                fetchType="eager"
+        >
+            <id property="metaId" column="meta_id" />
+            <result property="userId" column="userId" />
+            <result property="metaKey" column="meta_key" />
+            <result property="metaValue" column="meta_value" />
+        </collection>
+    </resultMap>
+</mapper>
