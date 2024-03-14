@@ -40,6 +40,6 @@
 
     <select id="queryUserByEmail" resultMap="userMetasMap">
         select * from users left join usermeta on users.id = usermeta.user_id
-        where users.user_email = #{userId} and users.user_pass = #{userPass}
+        where users.user_email = #{userEmail} and users.user_pass = #{userPass}
     </select>
 </mapper>

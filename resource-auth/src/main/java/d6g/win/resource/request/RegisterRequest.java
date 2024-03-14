@@ -10,9 +10,9 @@ import lombok.Data;
 public class RegisterRequest {
 
     @NotBlank(message = "请输入用户信息")
-    @JsonProperty("username")
+    @JsonProperty("displayName")
     @Pattern(regexp = "^(?!\\d+$)[a-zA-Z0-9]+$", message = "用户名不能为纯数字")
-    private String username;
+    private String displayName;
 
     @JsonProperty("email")
     @NotBlank(message = "请输入邮箱地址")
@@ -21,11 +21,4 @@ public class RegisterRequest {
     @NotBlank(message = "请输入密码")
     @JsonProperty("password")
     private String password;
-
-    @NotBlank(message = "请输入重复密码")
-    @JsonProperty("password_repeat")
-    private String passwordRepeat;
-
-    @JsonProperty("username_type")
-    private String usernameType;
 }

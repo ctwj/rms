@@ -132,7 +132,7 @@ public class IAuthServiceImpl implements IAuthService {
         } else {
             users = this.loginUsername(username, pass);
         }
-        if (users != null) {
+        if (users != null && !users.isEmpty()) {
             return users.get(0);
         }
         return null;

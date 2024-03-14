@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import axios, { AxiosError, AxiosResponse } from 'axios';
+import { AxiosError, AxiosResponse } from 'axios';
 import jwtDecode, { JwtPayload } from 'jwt-decode';
 import _ from '@lodash';
 import { PartialDeep } from 'type-fest';
+import axios from '../../../configs/axios';
 
 const defaultAuthConfig = {
 	tokenStorageKey: 'jwt_access_token',
@@ -220,6 +221,7 @@ const useJwtAuth = <User, SignInPayload, SignUpPayload>(
 
 		response.then(
 			(res: AxiosResponse<{ user: User; access_token: string }>) => {
+				console.log(res);
 				const userData = res?.data?.user;
 				const accessToken = res?.data?.access_token;
 

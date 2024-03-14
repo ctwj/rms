@@ -1,6 +1,7 @@
 package d6g.win.resource.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
@@ -10,9 +11,10 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
 public class LoginRequest {
 
     @NotBlank(message = "请输入用户信息")
-    @JsonProperty("username")
-    @Pattern(regexp = "^(?!\\d+$)[a-zA-Z0-9]+$", message = "用户名不能为纯数字")
-    private String username;
+    @JsonProperty("email")
+//    @Pattern(regexp = "^(?!\\d+$)[a-zA-Z0-9]+$", message = "用户名不能为纯数字")
+//    @Email
+    private String email;
 
     @NotBlank(message = "请输入密码")
     @JsonProperty("password")

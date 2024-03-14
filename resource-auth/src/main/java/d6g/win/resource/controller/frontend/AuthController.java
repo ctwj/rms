@@ -48,16 +48,16 @@ public class AuthController {
     public JsonResponse register (@Validated @RequestBody RegisterRequest request, BindingResult result) {
 
         // 参数校验
-        if (result.hasErrors() || !Objects.equals(request.getPassword(), request.getPasswordRepeat())) {
+        if (result.hasErrors()) {
             System.out.println("===> user: "+request);
             return ErrorHandler.HandleInvalidParameter(result);
         }
 
-        // 如果需要校验，则必须存在邮箱
-        if (IOptionService.isEnableActive() && !Objects.equals(request.getEmail(), null)) {
-            System.out.println("isWebsiteMaintian");
-            return ErrorHandler.HandleInvalidParameter(result);
-        }
+//        // 如果需要校验，则必须存在邮箱
+//        if (IOptionService.isEnableActive() && !Objects.equals(request.getEmail(), null)) {
+//            System.out.println("isWebsiteMaintian");
+//            return ErrorHandler.HandleInvalidParameter(result);
+//        }
 
         // 检测用户名是否重复， 检测邮箱是否重复
         if (IAuthService.isEmailExists(request.getEmail())) {
@@ -66,7 +66,7 @@ public class AuthController {
         }
 
         // 用户名重复判断
-        if (IAuthService.isNameExists(request.getUsername())) {
+        if (IAuthService.isNameExists(request.getDisplayName())) {
             System.out.println("isNameExists");
             return JsonResponse.error(CodeEnum.Error_Auth_ExistsUser);
         }
@@ -78,20 +78,52 @@ public class AuthController {
         }
 
         // 创建一个用户
-        UserEntity user = IAuthService.createNewUser(request.getUsername(), request.getPassword());
+        UserEntity user = IAuthService.createNewUser(request.getDisplayName(), request.getPassword());
 
         // 邮箱填充
         if (!Objects.equals(request.getEmail(), null)) {
             user.setUserEmail(request.getEmail());
         }
 
+        user.setDisplayName(request.getDisplayName());
+
         // 注册
         boolean registerOk = IAuthService.register(user);
         if (registerOk) {
-            return JsonResponse.success();
+            return JsonResponse.data(buildResultData(user, "user", false));
         }
-
         return JsonResponse.error(CodeEnum.Error);
+    }
+
+    private String getToken(Integer id, String name, boolean remember) {
+        Map<String, String> payload = new HashMap<String, String>();
+        payload.put("userId", String.valueOf(id));
+        payload.put("userLogin", name);
+        return JWTUtils.getToken(payload, remember);
+    }
+
+    private Map<String, Object> buildResultData(UserEntity user, String role, boolean remember) {
+        Integer id = user.getId();
+        String name = user.getUserLogin();
+        Map<String, String> payload = new HashMap<String, String>();
+        payload.put("userId", String.valueOf(id));
+        payload.put("userLogin", name);
+        String token = JWTUtils.getToken(payload, remember);
+        Map<String, Object> result = new HashMap<String, Object>() {{
+            put("uid", String.valueOf(id));
+            put("role", role);
+            put("data", new HashMap<String, Object>(){{
+                put("displayName", user.getDisplayName());
+                put("photoURL", "");
+                put("email", user.getUserEmail());
+                put("shortcuts", new ArrayList<String>() {{
+                    addAll(Collections.emptyList());
+                }});
+                put("settings", "");
+                put("loginRedirectUrl", "");
+            }});
+        }};
+        return result;
     }
 
     @PostMapping("/login")
@@ -100,30 +132,25 @@ public class AuthController {
         if (result.hasErrors()) {
             return ErrorHandler.HandleInvalidParameter(result);
         }
-        boolean remember = loginRequest.getRemember();
-        UserEntity user = IAuthService.login(loginRequest.getUsername(), loginRequest.getPassword());
+        boolean remember = false;
+        if (loginRequest.getRemember() != null) {
+            remember = loginRequest.getRemember();
+        }
+        UserEntity user = IAuthService.login(loginRequest.getEmail(), loginRequest.getPassword());
         if (user == null) {
             return JsonResponse.error(CodeEnum.Error_Auth_InvalidPassword);
         }
 
-        Map<String, String> payload = new HashMap<String, String>();
-        payload.put("userId", String.valueOf(user.getId()));
-        payload.put("userLogin", user.getUserLogin());
-        System.out.println(user);
-
         // 从 meta 中取出需要的数据
+        final String[] role = {""};
         List<UserMetaEntity> metas = user.getMetaEntities();
         metas.forEach(meta-> {
             // 返回值中添加权限
             if (Objects.equals(meta.getMetaKey(), MetaConstant.UserMetaRole)) {
-                payload.put("role", meta.getMetaValue());
+                role[0] = meta.getMetaValue();
             }
         });
 
-        // jwt
-        String token = JWTUtils.getToken(payload, remember);
-        payload.put("token", token);
-
-        return JsonResponse.data(payload);
+        return JsonResponse.data(buildResultData(user, role[0], remember));
     }
 }
