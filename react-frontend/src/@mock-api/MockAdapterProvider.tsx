@@ -10,7 +10,7 @@ const mockAdapterOptions = {
 	delayResponse: 0
 };
 
-const baseURL = 'http://';
+const baseURL = '/mock-api';
 
 type MockAdapterProviderProps = {
 	enabled?: boolean;

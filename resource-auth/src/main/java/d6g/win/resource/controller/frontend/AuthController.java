@@ -109,7 +109,7 @@ public class AuthController {
         payload.put("userId", String.valueOf(id));
         payload.put("userLogin", name);
         String token = JWTUtils.getToken(payload, remember);
-        Map<String, Object> result = new HashMap<String, Object>() {{
+        Map<String, Object> userData = new HashMap<String, Object>() {{
             put("uid", String.valueOf(id));
             put("role", role);
             put("data", new HashMap<String, Object>(){{
@@ -120,10 +120,13 @@ public class AuthController {
                     addAll(Collections.emptyList());
                 }});
                 put("settings", "");
-                put("loginRedirectUrl", "");
+                put("loginRedirectUrl", "/example");
             }});
         }};
-        return result;
+        return new HashMap<String, Object>() {{
+            put("access_token", token);
+            put("user", userData);
+        }};
     }
 
     @PostMapping("/login")
